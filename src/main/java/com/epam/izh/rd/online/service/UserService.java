@@ -1,8 +1,15 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.SimplePasswordException;
+import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
 import com.epam.izh.rd.online.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UserService implements IUserService {
 
@@ -30,15 +37,27 @@ public class UserService implements IUserService {
      * @param user - даныне регистрирующегося пользователя
      */
     @Override
-    public User register(User user) {
-
-        //
-        // Здесь необходимо реализовать перечисленные выше проверки
-        //
-
-        // Если все проверки успешно пройдены, сохраняем пользователя в базу
-        return userRepository.save(user);
+    public User register(User user) throws UserAlreadyRegisteredException, SimplePasswordException {
+        if (user==null||user.getLogin().trim().length() == 0 || user.getPassword().trim().length() == 0) {
+            throw new IllegalArgumentException("Ошибка в заполнении полей");
+        } else {
+            String login = user.getLogin();
+            String password = user.getPassword();
+            User userFindByLogin = userRepository.findByLogin(login);
+            if (userFindByLogin == null) {
+                Pattern pattern = Pattern.compile("^[0-9]+$");
+                Matcher matcher = pattern.matcher(password);
+                if (matcher.find()) {
+                    throw new SimplePasswordException();
+                } else {
+                    return userRepository.save(user);
+                }
+            } else {
+                throw new UserAlreadyRegisteredException("Пользователь с логином " + login + " уже зарегистрирован");
+            }
+        }
     }
+
 
     /**
      * Необходимо доработать данный метод следующим функционлом:
@@ -62,7 +81,7 @@ public class UserService implements IUserService {
 
         // Здесь необходимо сделать доработку метод
 
-            userRepository.deleteByLogin(login);
+        userRepository.deleteByLogin(login);
 
         // Здесь необходимо сделать доработку метода
 
