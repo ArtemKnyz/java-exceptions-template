@@ -73,7 +73,10 @@ public class UserService implements IUserService {
      * @param login
      */
     public void delete(String login) {
-
+        if(login.equals("Admin")){
+            throw new UnsupportedOperationException();
+        }
+//CurrentUserManager
         // Здесь необходимо сделать доработку метод
 
         userRepository.deleteByLogin(login);
