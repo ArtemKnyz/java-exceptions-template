@@ -38,22 +38,17 @@ public class UserService implements IUserService {
      */
     @Override
     public User register(User user) throws UserAlreadyRegisteredException, SimplePasswordException {
-        if (user==null||user.getLogin().trim().length() == 0 || user.getPassword().trim().length() == 0) {
+        if (user == null || user.getLogin().trim().length() == 0 || user.getPassword().trim().length() == 0) {
             throw new IllegalArgumentException("Ошибка в заполнении полей");
         } else {
             String login = user.getLogin();
-            String password = user.getPassword();
-            User userFindByLogin = userRepository.findByLogin(login);
-            if (userFindByLogin == null) {
-                Pattern pattern = Pattern.compile("^[0-9]+$");
-                Matcher matcher = pattern.matcher(password);
-                if (matcher.find()) {
-                    throw new SimplePasswordException();
-                } else {
-                    return userRepository.save(user);
-                }
-            } else {
+
+            if (userRepository.findByLogin(login) != null) {
                 throw new UserAlreadyRegisteredException("Пользователь с логином " + login + " уже зарегистрирован");
+            } else if (user.getPassword().matches("\\d+")) {
+                throw new SimplePasswordException();
+            } else {
+                return userRepository.save(user);
             }
         }
     }
