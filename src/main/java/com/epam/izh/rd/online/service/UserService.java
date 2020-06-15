@@ -1,6 +1,7 @@
 package com.epam.izh.rd.online.service;
 
 import com.epam.izh.rd.online.entity.User;
+import com.epam.izh.rd.online.exception.NotAccessException;
 import com.epam.izh.rd.online.exception.SimplePasswordException;
 import com.epam.izh.rd.online.exception.UserAlreadyRegisteredException;
 import com.epam.izh.rd.online.repository.IUserRepository;
@@ -72,17 +73,12 @@ public class UserService implements IUserService {
      *
      * @param login
      */
-    public void delete(String login) {
-        if(login.equals("Admin")){
+    public void delete(String login) throws NotAccessException {
+        try {
+            userRepository.deleteByLogin(login);
             throw new UnsupportedOperationException();
+        } catch (UnsupportedOperationException ex) {
+            throw new NotAccessException("Недостаточно прав для выполнения операции");
         }
-//CurrentUserManager
-        // Здесь необходимо сделать доработку метод
-
-        userRepository.deleteByLogin(login);
-
-        // Здесь необходимо сделать доработку метода
-
     }
-
 }
